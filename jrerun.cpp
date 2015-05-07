@@ -18,7 +18,7 @@ static void execute(const std::wstring& cmdline)
 	std::unique_ptr<wchar_t[]> p_cmdline = std::make_unique<wchar_t[]>(cmdline.length() + 1);
 	wcscpy(p_cmdline.get(), cmdline.c_str());
 
-	STARTUPINFO			si = { sizeof(STARTUPINFO) };
+	STARTUPINFO         si = { sizeof(STARTUPINFO) };
 	PROCESS_INFORMATION	pi = { NULL };
 	
 	if (CreateProcess(NULL, p_cmdline.get(), NULL, NULL, FALSE, CREATE_UNICODE_ENVIRONMENT, NULL, NULL, &si, &pi) != FALSE)
