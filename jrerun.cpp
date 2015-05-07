@@ -19,7 +19,7 @@ static void execute(const std::wstring& cmdline)
 	wcscpy(p_cmdline.get(), cmdline.c_str());
 
 	STARTUPINFO         si = { sizeof(STARTUPINFO) };
-	PROCESS_INFORMATION	pi = { NULL };
+	PROCESS_INFORMATION pi = { NULL };
 	
 	if (CreateProcess(NULL, p_cmdline.get(), NULL, NULL, FALSE, CREATE_UNICODE_ENVIRONMENT, NULL, NULL, &si, &pi) != FALSE)
 	{
