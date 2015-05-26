@@ -1,4 +1,5 @@
-#pragma once
+#ifndef JRERUN_TARGETVER_H
+#define JRERUN_TARGETVER_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -24,6 +25,10 @@
 #define STRICT
 #endif
 
+#ifndef STRICT_TYPED_ITEMIDS
+#define STRICT_TYPED_ITEMIDS
+#endif
+
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
@@ -33,3 +38,5 @@
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
+
+#endif
