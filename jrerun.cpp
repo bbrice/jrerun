@@ -18,20 +18,23 @@ static void execute(const std::wstring& cmdline)
 	std::unique_ptr<wchar_t[]> p_cmdline = std::make_unique<wchar_t[]>(cmdline.length() + 1);
 	wcscpy(p_cmdline.get(), cmdline.c_str());
 
-	STARTUPINFO         si = { sizeof(STARTUPINFO) };
-	PROCESS_INFORMATION pi = { NULL };
+	STARTUPINFO startup_info = { };
+	startup_info.cb = sizeof(STARTUPINFO);
+
+	PROCESS_INFORMATION process_info = { };
 	
-	if (CreateProcess(NULL, p_cmdline.get(), NULL, NULL, FALSE, CREATE_UNICODE_ENVIRONMENT, NULL, NULL, &si, &pi) != FALSE)
-	{
-		CloseHandle(pi.hThread);
-		CloseHandle(pi.hProcess);
+	if (CreateProcess(nullptr, p_cmdline.get(), nullptr, nullptr, FALSE,
+	                  CREATE_UNICODE_ENVIRONMENT, nullptr, nullptr,
+	                  &startup_info, &process_info)) {
+		CloseHandle(process_info.hThread);
+		CloseHandle(process_info.hProcess);
 	}
 }
 
 static bool get_reg_value(CRegKey& key, const std::wstring& value_name, std::wstring& value)
 {
 	ULONG value_size = 0;
-	if (key.QueryStringValue(value_name.c_str(), NULL, &value_size) != ERROR_SUCCESS)
+	if (key.QueryStringValue(value_name.c_str(), nullptr, &value_size) != ERROR_SUCCESS)
 		return false;
 
 	value.resize(value_size);
@@ -48,13 +51,12 @@ static bool get_reg_value(CRegKey& key, const std::wstring& value_name, std::wst
 static bool find_jre(std::wstring& jre_path)
 {
 	CRegKey jre;
-	if (jre.Open(HKEY_LOCAL_MACHINE, L"Software\\JavaSoft\\Java Runtime Environment", KEY_READ) != ERROR_SUCCESS)
-	{
+	if (jre.Open(HKEY_LOCAL_MACHINE, L"Software\\JavaSoft\\Java Runtime Environment", KEY_READ) != ERROR_SUCCESS) {
 		BOOL is_64bit_win;
-		if (IsWow64Process(GetCurrentProcess(), &is_64bit_win) == FALSE)
+		if (!IsWow64Process(GetCurrentProcess(), &is_64bit_win))
 			return false;
 
-		const REGSAM wow64_flag = (is_64bit_win ? KEY_WOW64_64KEY : KEY_WOW64_32KEY);
+		REGSAM wow64_flag = (is_64bit_win ? KEY_WOW64_64KEY : KEY_WOW64_32KEY);
 		if (jre.Open(HKEY_LOCAL_MACHINE, L"Software\\JavaSoft\\Java Runtime Environment", KEY_READ | wow64_flag) != ERROR_SUCCESS)
 			return false;
 	}
@@ -83,11 +85,10 @@ static bool get_exe_path(std::wstring& exe_path)
 	const size_t max_size_increment = MAX_PATH;
 	std::vector<wchar_t> exe_path_buf(max_size_increment);
 
-	DWORD size = GetModuleFileName(NULL, exe_path_buf.data(), static_cast<DWORD>(exe_path_buf.size()));
-	for (DWORD err = GetLastError(); err == ERROR_INSUFFICIENT_BUFFER; err = GetLastError())
-	{
+	DWORD size = GetModuleFileName(nullptr, exe_path_buf.data(), static_cast<DWORD>(exe_path_buf.size()));
+	for (DWORD err = GetLastError(); err == ERROR_INSUFFICIENT_BUFFER; err = GetLastError()) {
 		exe_path_buf.resize(exe_path_buf.size() + max_size_increment);
-		size = GetModuleFileName(NULL, exe_path_buf.data(), static_cast<DWORD>(exe_path_buf.size()));
+		size = GetModuleFileName(nullptr, exe_path_buf.data(), static_cast<DWORD>(exe_path_buf.size()));
 	}
 
 	if (size > 0)
@@ -96,16 +97,20 @@ static bool get_exe_path(std::wstring& exe_path)
 	return exe_path.length() > 0;
 }
 
-static bool get_property(const std::wstring& properties_filename, const std::wstring& section, const std::wstring& name, std::wstring& value)
+static bool get_property(const std::wstring& properties_filename,
+                         const std::wstring& section,
+                         const std::wstring& name,
+                               std::wstring& value)
 {
-	const DWORD value_length = GetPrivateProfileString(section.c_str(), name.c_str(), NULL, &value[0], static_cast<DWORD>(value.size()), properties_filename.c_str());
-	value.resize(value_length);
-	return value.length() > 0;
+	value.resize(GetPrivateProfileString(section.c_str(), name.c_str(), nullptr,
+	                                     &value[0], static_cast<DWORD>(value.size()),
+	                                     properties_filename.c_str()));
+	return !value.empty();
 }
 
 static void get_properties_filename(const std::wstring& exe_path, std::wstring& properties_path)
 {
-	const size_t dot_pos = exe_path.find_last_of(L".\\/");
+	size_t dot_pos = exe_path.find_last_of(L".\\/");
 
 	if (dot_pos != std::wstring::npos && exe_path[dot_pos] == L'.')
 		properties_path = exe_path.substr(0, dot_pos);
@@ -118,14 +123,12 @@ static void get_properties_filename(const std::wstring& exe_path, std::wstring& 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
 	std::wstring exe_path;
-	if (get_exe_path(exe_path))
-	{
+	if (get_exe_path(exe_path)) {
 		std::wstring properties_path;
 		get_properties_filename(exe_path, properties_path);
 
 		std::wstring jre_path;
-		if (find_jre(jre_path))
-		{
+		if (find_jre(jre_path)) {
 			std::wostringstream cmdline;
 			cmdline << L'"' << jre_path << L'"';
 
