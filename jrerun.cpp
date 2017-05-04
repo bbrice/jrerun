@@ -25,7 +25,8 @@ static void execute(const std::wstring& cmdline)
 	
 	if (CreateProcess(nullptr, p_cmdline.get(), nullptr, nullptr, FALSE,
 	                  CREATE_UNICODE_ENVIRONMENT, nullptr, nullptr,
-	                  &startup_info, &process_info)) {
+	                  &startup_info, &process_info))
+	{
 		CloseHandle(process_info.hThread);
 		CloseHandle(process_info.hProcess);
 	}
