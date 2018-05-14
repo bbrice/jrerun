@@ -11,7 +11,7 @@ command prompt or have some kind of file association to `javaw.exe`.
 
 Building
 --------
-At the moment, Visual Studio 2013.4 is used for this project.
+At the moment, Visual Studio 2017 is used for this project.
 
 Usage
 -----
