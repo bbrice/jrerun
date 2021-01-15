@@ -2,7 +2,7 @@ jrerun
 ======
 An executable launcher for Java applications.
 
-The current project page is located here: <https://github.com/bbrice/jrerun>
+The current project page is located here: <https://github.com/blb2/jrerun>
 
 Motivation
 ----------
