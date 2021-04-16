@@ -41,5 +41,4 @@ to pass arguments to `jrerun`:
 
 License
 -------
-`jrerun` is licensed under the BSD license. See [LICENSE.txt](LICENSE.txt)
-for more info.
+`jrerun` is licensed under version 3 of the GPL or later. See [LICENSE.txt](LICENSE.txt) for more info.
